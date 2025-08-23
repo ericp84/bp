@@ -28,7 +28,7 @@ return [
      * Pick a login page layout.
      * Possible values: default, illustration, cover
      */
-    'auth_layout' => 'illustration', // default, illustration, cover
+    'auth_layout' => 'default', // default, illustration, cover
 
     /**
      * Here you can easily load your own extra css styles.
@@ -42,6 +42,9 @@ return [
         base_path('vendor/backpack/theme-tabler/resources/assets/css/color-adjustments.css'),
         base_path('vendor/backpack/theme-tabler/resources/assets/css/colors.css'),
         resource_path('css/backpack-overrides.css'),
+        resource_path('css/vertical-sidebar.css'),
+        resource_path('css/global-custom.css'),
+        resource_path('css/login-form.css'),
     ],
 
     /**
@@ -54,7 +57,11 @@ return [
         /**
          * The available color modes.
          */
-        'colorModes' => [],
+        'colorModes' => [
+            'system' => 'la-desktop',
+            'light' => 'la-sun',
+            'dark' => 'la-moon',
+        ],
 
         /**
          * The color mode used by default.
@@ -66,7 +73,7 @@ return [
          * When false, the theme will only use the "defaultColorMode" set above.
          * In case "defaultColorMode" is null, system is the default.
          */
-        'showColorModeSwitcher' => true,
+        'showColorModeSwitcher' => false,
 
         /**
          * Fix the top-header component (present in "vertical_transparent") and the menu when the layout type is set as "horizontal".

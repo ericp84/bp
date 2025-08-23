@@ -122,7 +122,7 @@
 /* Dark theme */
 [data-bs-theme="dark"],
 [data-menu-theme="dark"] {
-    --tblr-body-color: var(--tblr-gray-400);
+    --tblr-body-color: var(--tblr-gray-100);
     --tblr-body-color-rgb: 160, 155, 190;
     --tblr-body-bg: #000000;
     --tblr-body-bg-rgb: 24, 24, 24;
@@ -189,6 +189,7 @@
     --tblr-form-invalid-border-color: #d69090;
 
     /* Surfaces */
+    /* --tblr-bg-surface: #353535; */
     --tblr-bg-surface: #000000;
     --tblr-navbar-bg: var(--tblr-bg-surface);
     --tblr-dark-mode-border-color: #302b33;
