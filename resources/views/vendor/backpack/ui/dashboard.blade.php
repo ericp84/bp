@@ -20,4 +20,5 @@
 @endphp
 
 @section('content')
+//TODO: replace here with the component i want to display on dashboard home page
 @endsection
