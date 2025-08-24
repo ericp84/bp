@@ -105,7 +105,7 @@
     /* Focus ring */
     --tblr-focus-ring-width: 0.25rem;
     --tblr-focus-ring-opacity: 0.25;
-    --tblr-focus-ring-color: rgba(255, 107, 44, 0.25);
+    --tblr-focus-ring-color: rgba(155, 68, 31, 0.25);
 
     /* Forms state */
     --tblr-form-valid-color: #42ba96;
