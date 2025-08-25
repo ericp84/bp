@@ -21,8 +21,23 @@ class SecretCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
+    /**
+     * Configure the CrudPanel object. Apply settings to all operations.
+     * 
+     * @return void
+     */
+
+    public function setup()
+    {
+        CRUD::setModel(\Domains\Secret\Models\Secret::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/secret');
+        CRUD::setEntityNameStrings('secret', 'secrets');
+    }
+
     protected function setupShowOperation()
     {
+        $this->checkSecretAccess();
+
         CRUD::column('project')->label('Projet');
         CRUD::column('service')->label('Service');
         CRUD::addColumn([
@@ -75,17 +90,7 @@ class SecretCrudController extends CrudController
         CRUD::column('additional_information')->label('Info. complémentaires');
     }
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
-    public function setup()
-    {
-        CRUD::setModel(\Domains\Secret\Models\Secret::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/secret');
-        CRUD::setEntityNameStrings('secret', 'secrets');
-    }
+
 
     /**
      * Define what happens when the List operation is loaded.
@@ -96,19 +101,21 @@ class SecretCrudController extends CrudController
     protected function setupListOperation()
     {
         $user = backpack_user();
-        // $this->crud->addClause('where', function ($query) use ($user) {
-        //     $query->where('created_by', $user->id)
-        //         ->orWhereHas('sharedWith', function ($q) use ($user) {
-        //             $q->where('users.id', $user->id);
-        //         });
-        // });
+
         CRUD::column('project')->label('Projet');
         CRUD::column('service')->label('Service');
+
         CRUD::addColumn([
             'name' => 'link',
             'label' => 'Lien',
             'type' => 'custom_html',
-            'value' => function ($entry) {
+            'value' => function ($entry) use ($user) {
+                $hasAccess = ($entry->created_by == $user->id) ||
+                    $entry->sharedWith->contains('id', $user->id);
+                if (!$hasAccess) {
+                    return '<span style="color: #999;">Accès restreint</span>';
+                }
+
                 $id = 'link-show-' . $entry->id;
                 $val = e($entry->link);
                 $tooltipId = 'tooltip-link-show-' . $entry->id;
@@ -121,7 +128,13 @@ class SecretCrudController extends CrudController
             'name' => 'username',
             'label' => "Nom d'utilisateur",
             'type' => 'custom_html',
-            'value' => function ($entry) {
+            'value' => function ($entry) use ($user) {
+                $hasAccess = ($entry->created_by == $user->id) ||
+                    $entry->sharedWith->contains('id', $user->id);
+                if (!$hasAccess) {
+                    return '<span style="color: #999;">Accès restreint</span>';
+                }
+
                 $id = 'username-show-' . $entry->id;
                 $val = e($entry->username);
                 $tooltipId = 'tooltip-username-show-' . $entry->id;
@@ -134,7 +147,14 @@ class SecretCrudController extends CrudController
             'name' => 'password',
             'label' => 'Mot de passe',
             'type' => 'custom_html',
-            'value' => function ($entry) {
+            'value' => function ($entry) use ($user) {
+                $hasAccess = ($entry->created_by == $user->id) ||
+                    $entry->sharedWith->contains('id', $user->id);
+
+                if (!$hasAccess) {
+                    return '<span style="color: #999;">Accès restreint</span>';
+                }
+
                 $id = 'pw-show-' . $entry->id;
                 $pw = e($entry->password);
                 $tooltipId = 'tooltip-show-' . $entry->id;
@@ -147,11 +167,43 @@ class SecretCrudController extends CrudController
             'name' => 'is_active',
             'label' => 'Actif',
             'type' => 'custom_html',
-            'value' => function ($entry) {
+            'value' => function ($entry) use ($user) {
+                $hasAccess = ($entry->created_by == $user->id) ||
+                    $entry->sharedWith->contains('id', $user->id);
+
+                if (!$hasAccess) {
+                    return '<span style="color: #999;">Accès restreint</span>';
+                }
+
                 return $entry->is_active ? 'Oui' : 'Non';
             },
         ]);
-        CRUD::column('additional_information')->label('Info. complémentaires');
+        CRUD::addColumn([
+            'name' => 'additional_information',
+            'label' => 'Info. complémentaires',
+            'type' => 'custom_html',
+            'value' => function ($entry) use ($user) {
+                $hasAccess = ($entry->created_by == $user->id) ||
+                    $entry->sharedWith->contains('id', $user->id);
+
+                if (!$hasAccess) {
+                    return '<span style="color: #999;">Accès restreint</span>';
+                }
+
+                return e($entry->additional_information);
+            },
+        ]);
+
+        $userHasAccessToAnySecret = \Domains\Secret\Models\Secret::where(function ($query) use ($user) {
+            $query->where('created_by', $user->id)
+                ->orWhereHas('sharedWith', function ($q) use ($user) {
+                    $q->where('users.id', $user->id);
+                });
+        })->exists();
+
+        if (!$userHasAccessToAnySecret) {
+            $this->crud->removeAllButtons();
+        }
     }
 
     /**
@@ -189,6 +241,42 @@ class SecretCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
+        $this->checkSecretAccess();
         $this->setupCreateOperation();
     }
+
+    /**
+     * Vérifier l'accès à un secret (créateur ou partagé avec)
+     */
+    private function checkSecretAccess()
+    {
+        $secretId = request()->route('id');
+        if ($secretId) {
+            $secret = \Domains\Secret\Models\Secret::findOrFail($secretId);
+            $user = backpack_user();
+
+            $hasAccess = ($secret->created_by == $user->id) ||
+                $secret->sharedWith->contains('id', $user->id);
+
+            if (!$hasAccess) {
+                abort(403, '🚫 Vous n\'avez pas accès à ce secret.');
+            }
+        }
+    }
+
+    /**
+     * Vérifier la propriété d'un secret (seulement le créateur)
+     */
+    // private function checkSecretOwnership()
+    // {
+    //     $secretId = request()->route('id');
+    //     if ($secretId) {
+    //         $secret = \Domains\Secret\Models\Secret::findOrFail($secretId);
+    //         $user = backpack_user();
+
+    //         if ($secret->created_by != $user->id) {
+    //             abort(403, 'Seul le créateur peut modifier ce secret.');
+    //         }
+    //     }
+    // }
 }

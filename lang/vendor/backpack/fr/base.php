@@ -51,6 +51,7 @@ return [
     'error_saving' => 'Erreur lors de l’enregistrement. Veuillez réessayer.',
     'welcome' => 'Bienvenue!',
     'use_sidebar' => 'Utilisez la barre latérale pour ajouter, modifier ou supprimer du contenu.',
+    'email' => 'E-mail',
 
     'password_reset' => [
         'greeting' => 'Bonjour!',
