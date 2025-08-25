@@ -47,4 +47,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function secrets()
+    {
+        return $this->hasMany(Secret::class, 'created_by');
+    }
+
+    public function sharedSecrets()
+    {
+        return $this->belongsToMany(Secret::class, 'secret_user');
+    }
 }

@@ -24,4 +24,14 @@ class Secret extends Model
         'additional_information',
         'created_by',
     ];
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function sharedWith()
+    {
+        return $this->belongsToMany(User::class, 'secret_user');
+    }
 }

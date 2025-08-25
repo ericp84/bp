@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\SecretRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Domains\Auth\Models\User;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -94,6 +95,13 @@ class SecretCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        $user = backpack_user();
+        // $this->crud->addClause('where', function ($query) use ($user) {
+        //     $query->where('created_by', $user->id)
+        //         ->orWhereHas('sharedWith', function ($q) use ($user) {
+        //             $q->where('users.id', $user->id);
+        //         });
+        // });
         CRUD::column('project')->label('Projet');
         CRUD::column('service')->label('Service');
         CRUD::addColumn([

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Domains\Secret\Models\Secret;
+use Domains\Secret\Observers\SecretObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Secret::observe(SecretObserver::class);
     }
 }
