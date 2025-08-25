@@ -243,6 +243,16 @@ class SecretCrudController extends CrudController
     {
         $this->checkSecretAccess();
         $this->setupCreateOperation();
+        CRUD::addField([
+            'name' => 'sharedWith',
+            'label' => 'Partager avec',
+            'type' => 'checklist',
+            'entity' => 'sharedWith',
+            'model' => User::class,
+            'attribute' => 'name',
+            'pivot' => true,
+            'hint' => 'Cochez les utilisateurs avec qui vous souhaitez partager ce secret.'
+        ]);
     }
 
     /**
@@ -263,20 +273,4 @@ class SecretCrudController extends CrudController
             }
         }
     }
-
-    /**
-     * Vérifier la propriété d'un secret (seulement le créateur)
-     */
-    // private function checkSecretOwnership()
-    // {
-    //     $secretId = request()->route('id');
-    //     if ($secretId) {
-    //         $secret = \Domains\Secret\Models\Secret::findOrFail($secretId);
-    //         $user = backpack_user();
-
-    //         if ($secret->created_by != $user->id) {
-    //             abort(403, 'Seul le créateur peut modifier ce secret.');
-    //         }
-    //     }
-    // }
 }

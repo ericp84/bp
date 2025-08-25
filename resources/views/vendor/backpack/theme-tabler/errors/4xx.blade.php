@@ -1,6 +1,5 @@
 @extends(backpack_view('errors.layout'))
 @php
-dd(backpack_view('errors.layout'));
   $error_number ??= 400;
   $shouldEscape = ! in_array('developer-error-exception', $exception->getHeaders());
 @endphp
