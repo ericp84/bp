@@ -2,42 +2,29 @@
 @extends(backpack_view(backpack_user() ? 'layouts.'.backpack_theme_config('layout') : 'errors.blank'))
 
 @php
-    $error_number = 403;
+    $error_number = 404;
 @endphp
 
 @section('content')
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6 text-center">
         <div class="error-page">
-            <!-- Icône d'interdiction -->
             <div class="error-icon mb-4">
                 <div class="forbidden-icon">
-                    🚫
+                    <i class="las la-search" style="color: #dc3545;"></i>
                 </div>
             </div>
-            
-            <!-- Code d'erreur -->
             <div class="error_number mb-3">
                 <small>ERREUR</small><br>
-                403
+                404
                 <hr>
             </div>
-            
-            <!-- Titre -->
             <div class="error_title mb-3">
-                Accès Interdit
+                Page non trouvée
             </div>
-            
-            <!-- Description -->
             <div class="error_description mb-4">
-                @if(isset($exception) && $exception->getMessage())
-                    {{ $exception->getMessage() }}
-                @else
-                    Vous n'avez pas les autorisations nécessaires pour accéder à cette ressource.
-                @endif
+                La page que vous recherchez est introuvable.
             </div>
-            
-            <!-- Actions pour utilisateurs connectés -->
             @if(backpack_user())
             <div class="error-actions mt-4">
                 <a href="javascript:history.back()" class="btn btn-outline-secondary me-2">
