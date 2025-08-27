@@ -45,6 +45,7 @@ return [
         resource_path('css/vertical-sidebar.css'),
         resource_path('css/global-custom.css'),
         resource_path('css/login-form.css'),
+        resource_path('css/custom-errors.css'),
     ],
 
     /**

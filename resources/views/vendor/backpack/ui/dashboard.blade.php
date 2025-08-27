@@ -1,24 +1,23 @@
 @extends(backpack_view('blank'))
 
 @php
+    use Domains\Secret\Models\Secret;
     if (backpack_theme_config('show_getting_started')) {
         $widgets['before_content'][] = [
             'type'        => 'view',
             'view'        => backpack_view('inc.getting_started'),
         ];
     } else {
+        $nbSecrets = Secret::count();
         $widgets['before_content'][] = [
-            'type'        => 'jumbotron',
-            'heading'     => trans('backpack::base.welcome'),
-            'heading_class' => 'display-3 '.(backpack_theme_config('layout') === 'horizontal_overlap' ? ' text-white' : ''),
-            'content'     => trans('backpack::base.use_sidebar'),
-            'content_class' => backpack_theme_config('layout') === 'horizontal_overlap' ? 'text-white' : '',
-            'button_link' => backpack_url('logout'),
-            'button_text' => trans('backpack::base.logout'),
+            'type'          => 'progress_white',
+            'class'         => 'card mb-2 custom-card-secrets',
+            'value'         => Secret::count(),
+            'description'   => trans('backpack::base.secrets_count', ['count' => $nbSecrets]),
+            'progressClass' => 'progress-bar bg-success',
         ];
     }
 @endphp
 
 @section('content')
-//TODO: replace here with the component i want to display on dashboard home page
 @endsection

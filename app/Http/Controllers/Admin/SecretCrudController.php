@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\SecretRequest;
+use App\Services\SecretAccessService;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Domains\Auth\Models\User;
-use Illuminate\Support\Facades\Log;
+use Domains\Secret\Models\Secret;
 
 /**
  * Class SecretCrudController
@@ -20,6 +21,14 @@ class SecretCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+
+    protected $secretAccessService;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->secretAccessService = app(SecretAccessService::class);
+    }
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -36,7 +45,7 @@ class SecretCrudController extends CrudController
 
     protected function setupShowOperation()
     {
-        $this->checkSecretAccess();
+        $this->secretAccessService->ensureAccess(backpack_user(), request()->route('id'));
 
         CRUD::column('project')->label('Projet');
         CRUD::column('service')->label('Service');
@@ -110,8 +119,7 @@ class SecretCrudController extends CrudController
             'label' => 'Lien',
             'type' => 'custom_html',
             'value' => function ($entry) use ($user) {
-                $hasAccess = ($entry->created_by == $user->id) ||
-                    $entry->sharedWith->contains('id', $user->id);
+                $hasAccess = $this->secretAccessService->canAccessSecret($user, $entry);
                 if (!$hasAccess) {
                     return '<span style="color: #999;">Accès restreint</span>';
                 }
@@ -129,8 +137,7 @@ class SecretCrudController extends CrudController
             'label' => "Nom d'utilisateur",
             'type' => 'custom_html',
             'value' => function ($entry) use ($user) {
-                $hasAccess = ($entry->created_by == $user->id) ||
-                    $entry->sharedWith->contains('id', $user->id);
+                $hasAccess = $this->secretAccessService->canAccessSecret($user, $entry);
                 if (!$hasAccess) {
                     return '<span style="color: #999;">Accès restreint</span>';
                 }
@@ -148,8 +155,7 @@ class SecretCrudController extends CrudController
             'label' => 'Mot de passe',
             'type' => 'custom_html',
             'value' => function ($entry) use ($user) {
-                $hasAccess = ($entry->created_by == $user->id) ||
-                    $entry->sharedWith->contains('id', $user->id);
+                $hasAccess = $this->secretAccessService->canAccessSecret($user, $entry);
 
                 if (!$hasAccess) {
                     return '<span style="color: #999;">Accès restreint</span>';
@@ -168,8 +174,7 @@ class SecretCrudController extends CrudController
             'label' => 'Actif',
             'type' => 'custom_html',
             'value' => function ($entry) use ($user) {
-                $hasAccess = ($entry->created_by == $user->id) ||
-                    $entry->sharedWith->contains('id', $user->id);
+                $hasAccess = $this->secretAccessService->canAccessSecret($user, $entry);
 
                 if (!$hasAccess) {
                     return '<span style="color: #999;">Accès restreint</span>';
@@ -183,8 +188,7 @@ class SecretCrudController extends CrudController
             'label' => 'Info. complémentaires',
             'type' => 'custom_html',
             'value' => function ($entry) use ($user) {
-                $hasAccess = ($entry->created_by == $user->id) ||
-                    $entry->sharedWith->contains('id', $user->id);
+                $hasAccess = $this->secretAccessService->canAccessSecret($user, $entry);
 
                 if (!$hasAccess) {
                     return '<span style="color: #999;">Accès restreint</span>';
@@ -194,15 +198,8 @@ class SecretCrudController extends CrudController
             },
         ]);
 
-        $userHasAccessToAnySecret = \Domains\Secret\Models\Secret::where(function ($query) use ($user) {
-            $query->where('created_by', $user->id)
-                ->orWhereHas('sharedWith', function ($q) use ($user) {
-                    $q->where('users.id', $user->id);
-                });
-        })->exists();
-
-        if (!$userHasAccessToAnySecret) {
-            $this->crud->removeAllButtons();
+        if (!$this->secretAccessService->userHasAccessToAnySecret($user)) {
+            $this->crud->denyAccess(['update', 'delete', 'show']);
         }
     }
 
@@ -241,7 +238,7 @@ class SecretCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
-        $this->checkSecretAccess();
+        $this->secretAccessService->ensureAccess(backpack_user(), request()->route('id'));
         $this->setupCreateOperation();
         CRUD::addField([
             'name' => 'sharedWith',
@@ -253,24 +250,5 @@ class SecretCrudController extends CrudController
             'pivot' => true,
             'hint' => 'Cochez les utilisateurs avec qui vous souhaitez partager ce secret.'
         ]);
-    }
-
-    /**
-     * Vérifier l'accès à un secret (créateur ou partagé avec)
-     */
-    private function checkSecretAccess()
-    {
-        $secretId = request()->route('id');
-        if ($secretId) {
-            $secret = \Domains\Secret\Models\Secret::findOrFail($secretId);
-            $user = backpack_user();
-
-            $hasAccess = ($secret->created_by == $user->id) ||
-                $secret->sharedWith->contains('id', $user->id);
-
-            if (!$hasAccess) {
-                abort(403, '🚫 Vous n\'avez pas accès à ce secret.');
-            }
-        }
     }
 }

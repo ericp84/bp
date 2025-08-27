@@ -51,7 +51,7 @@
             <div class="col-sm-{{ intval(12/$field['number_of_columns']) }}">
                 <div class="checkbox">
                   <label class="font-weight-normal">
-                    <input type="checkbox" value="{{ $key }}"> {{ $option }}
+                    <input type="checkbox" class="form-check-input" value="{{ $key }}"> {{ $option }}
                   </label>
                 </div>
             </div>

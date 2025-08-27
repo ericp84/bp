@@ -19,3 +19,85 @@ input:focus,
     box-shadow: 0 0 0 0.25rem rgba(155, 68, 31, 0.25) !important;
     border-color: #ff6b2c !important;
 }
+
+.custom-card-secrets {
+    background-color: #111827; /* fond sombre */
+    color: #f9fafb; /* texte clair */
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.custom-card-secrets::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--tblr-primary);
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+.custom-card-secrets .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Valeur principale */
+.custom-card-secrets .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Description */
+.custom-card-secrets .description {
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+/* Texte en bas (hint) */
+.custom-card-secrets .hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+/* Progress bar fine et moderne */
+.custom-card-secrets .progress {
+    height: 4px;
+    border-radius: 2px;
+    background-color: #1f2937;
+    overflow: hidden;
+}
+
+.custom-card-secrets .progress-bar {
+    border-radius: 2px;
+}
+
+.custom-card-secrets .card-body > div:nth-child(1) {
+    order: 2;
+}
+
+.custom-card-secrets .card-body > div:nth-child(2) {
+    order: 1;
+}
+
+.custom-card-secrets .card-body > div:nth-child(3) {
+    order: 3;
+}
+
+.custom-card-secrets .card-body > div:nth-child(4) {
+    order: 4;
+}
+
+.custom-checklist-wrapper input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--tblr-primary);
+    border-radius: 4px;
+}

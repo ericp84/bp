@@ -52,7 +52,7 @@ return [
     'welcome' => 'Bienvenue!',
     'use_sidebar' => 'Utilisez la barre latérale pour ajouter, modifier ou supprimer du contenu.',
     'email' => 'E-mail',
-
+    'secrets_count' => 'Secret disponible',
     'password_reset' => [
         'greeting' => 'Bonjour!',
         'subject' => 'Réinitialisation du mot de passe',
