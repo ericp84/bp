@@ -51,7 +51,15 @@
             <div class="col-sm-{{ intval(12/$field['number_of_columns']) }}">
                 <div class="checkbox">
                   <label class="font-weight-normal">
-                    <input type="checkbox" class="form-check-input" value="{{ $key }}"> {{ $option }}
+                    @if(isset($field['creator_id']) && $key == $field['creator_id'])
+                        <input type="hidden" name="{{ $field['name'] }}[]" value="{{ $key }}">
+                        <input type="checkbox" class="form-check-input" value="{{ $key }}" checked disabled> {{ $option }} <i class="las la-crown" title="Créateur" style="color:#ff6b2c;"></i>
+                    @else
+                        <input type="checkbox" class="form-check-input" value="{{ $key }}"
+                            @if( in_array($key, $field['value']) ) checked @endif
+                            name="{{ $field['name'] }}[]"
+                        > {{ $option }}
+                    @endif
                   </label>
                 </div>
             </div>

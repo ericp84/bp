@@ -238,17 +238,32 @@ class SecretCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
+        $secret = $this->crud->getCurrentEntry();
+        $creatorId = $secret->created_by;
         $this->secretAccessService->ensureAccess(backpack_user(), request()->route('id'));
         $this->setupCreateOperation();
+
+        $sharedWithIds = $secret->sharedWith()->pluck('users.id')->toArray();
+        if (!in_array($creatorId, $sharedWithIds)) {
+            $sharedWithIds[] = $creatorId;
+        }
+
         CRUD::addField([
-            'name' => 'sharedWith',
-            'label' => 'Partager avec',
-            'type' => 'checklist',
-            'entity' => 'sharedWith',
-            'model' => User::class,
+            'name'      => 'sharedWith',
+            'label'     => 'Partager avec',
+            'type'      => 'checklist',
+            'entity'    => 'sharedWith',
+            'model'     => User::class,
             'attribute' => 'name',
-            'pivot' => true,
-            'hint' => 'Cochez les utilisateurs avec qui vous souhaitez partager ce secret.'
+            'pivot'     => true,
+            'hint'      => 'Le créateur a un accès permanent et non révocable.',
+            'view'      => 'vendor.backpack.crud.fields.checklist_with_disabled',
+            'creator_id' => $creatorId,
+            'value'     => $sharedWithIds,
+            'options'   => (function ($query) {
+                $usersAvailable = $query->get();
+                return $usersAvailable->pluck('name', 'id');
+            }),
         ]);
     }
 }

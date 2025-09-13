@@ -9,12 +9,13 @@
         ];
     } else {
             $user = backpack_auth()->user();
-            $nbSecrets = $user->sharedSecrets()->count();
+            $nbSecretsShared = $user->sharedSecrets()->count();
+            $nbSecretsOwned = Secret::where('created_by', $user->id)->count();  
             $widgets['before_content'][] = [
                 'type'          => 'progress_white',
                 'class'         => 'card mb-2 custom-card-secrets',
-                'value'         => $nbSecrets,
-                'description'   => trans('backpack::base.secrets_count', ['count' => $nbSecrets]),
+                'value'         => $nbSecretsShared == 0 ? $nbSecretsOwned : $nbSecretsShared,
+                'description'   => trans('backpack::base.secrets_count', ['count' => $nbSecretsShared]),
                 'progressClass' => 'progress-bar bg-success',
             ];
     }
