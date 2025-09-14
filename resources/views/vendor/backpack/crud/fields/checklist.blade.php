@@ -44,7 +44,7 @@
     
     @include('crud::fields.inc.translatable_icon')
 
-    <input type="hidden" data-show-select-all="{{var_export($field['show_select_all'])}}" value='@json($field['value'])' name="{{ $field['name'] }}">
+  {{-- Suppression du champ hidden global pour éviter l'envoi d'un tableau JSON --}}
 
     <div class="row checklist-options-container">
         @foreach ($field['options'] as $key => $option)
@@ -88,7 +88,6 @@
                 let showSelectAll = hidden_input.data('show-select-all');
                 let selectAllAnchor = element.find('.checklist-select-all-inputs').find('a.select-all-inputs');
                 let unselectAllAnchor = element.find('.checklist-select-all-inputs').find('a.unselect-all-inputs');
-
                 // set the default checked/unchecked states on checklist options
                 checkboxes.each(function(key, option) {
                   var id = $(this).val();

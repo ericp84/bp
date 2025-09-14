@@ -257,13 +257,18 @@ class SecretCrudController extends CrudController
             'attribute' => 'name',
             'pivot'     => true,
             'hint'      => 'Le créateur a un accès permanent et non révocable.',
-            'view'      => 'vendor.backpack.crud.fields.checklist_with_disabled',
             'creator_id' => $creatorId,
             'value'     => $sharedWithIds,
-            'options'   => (function ($query) {
+            'options'   => function ($query) use ($creatorId) {
                 $usersAvailable = $query->get();
-                return $usersAvailable->pluck('name', 'id');
-            }),
+                $users = $usersAvailable->pluck('name', 'id')->toArray();
+                if (isset($users[$creatorId])) {
+                    $creator = [$creatorId => $users[$creatorId]];
+                    unset($users[$creatorId]);
+                    $users = $creator + $users;
+                }
+                return $users;
+            },
         ]);
     }
 }
