@@ -67,7 +67,7 @@ return [
         /**
          * The color mode used by default.
          */
-        'defaultColorMode' => 'dark', // system, light, dark
+        'defaultColorMode' => 'light', // system, light, dark
 
         /**
          * When true, a switch is displayed to let admins choose their favorite theme mode.

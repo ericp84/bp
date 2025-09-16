@@ -27,7 +27,7 @@
         <label class="form-label" for="password">
             {{ trans('backpack::base.password') }}
         </label>
-        <div class="input-group input-group-flat password-visibility-toggler">
+        <div class="input-group password-visibility-toggler custom-password">
             <input tabindex="2" type="password" name="password" id="password" class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}" value="">
             @if(backpack_theme_config('options.showPasswordVisibilityToggler'))
             <span class="input-group-text p-0 px-2">
