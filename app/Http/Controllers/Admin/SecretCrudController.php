@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Domains\Auth\Models\User;
 use App\Http\Requests\SecretRequest;
 use App\Services\SecretAccessService;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Domains\Auth\Models\User;
-use Domains\Secret\Models\Secret;
 
 /**
  * Class SecretCrudController
@@ -17,10 +16,10 @@ use Domains\Secret\Models\Secret;
 class SecretCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     protected $secretAccessService;
 
@@ -223,7 +222,10 @@ class SecretCrudController extends CrudController
         CRUD::field('password')->label('Mot de passe');
         CRUD::field('is_active')->label('Actif');
         CRUD::field('additional_information')->label('Info. complémentaires');
-        CRUD::field('created_by')->type('hidden')->value($user->id);
+
+        if (request()->route()->getName() === 'crud.secret.create') {
+            CRUD::field('created_by')->type('hidden')->value($user->id);
+        }
         /**
          * Fields can be defined using the fluent syntax:
          * - CRUD::field('price')->type('number');
@@ -238,17 +240,22 @@ class SecretCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
+        $user = backpack_user();
+
         $secret = $this->crud->getCurrentEntry();
         $creatorId = $secret->created_by;
         $this->secretAccessService->ensureAccess(backpack_user(), request()->route('id'));
         $this->setupCreateOperation();
 
+        CRUD::field('updated_by')->type('hidden')->value($user->id);
+
         $sharedWithIds = $secret->sharedWith()->pluck('users.id')->toArray();
         if (!in_array($creatorId, $sharedWithIds)) {
             $sharedWithIds[] = $creatorId;
         }
-
+        dump($secret->password);
         CRUD::addField([
+            'password' => $secret->password,
             'name'      => 'sharedWith',
             'label'     => 'Partager avec',
             'type'      => 'checklist',

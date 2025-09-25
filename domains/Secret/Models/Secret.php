@@ -2,12 +2,12 @@
 
 namespace Domains\Secret\Models;
 
-use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Domains\Auth\Models\User;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Crypt;
+use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Domains\Secret\Services\SecretEncryptionService;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Secret extends Model
 {
@@ -15,6 +15,13 @@ class Secret extends Model
     use HasFactory;
 
     protected $table = 'secrets';
+    protected $secretEncryptionService;
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        $this->secretEncryptionService = app(SecretEncryptionService::class);
+    }
 
     protected $fillable = [
         'project',
@@ -25,6 +32,7 @@ class Secret extends Model
         'is_active',
         'additional_information',
         'created_by',
+        'updated_by',
     ];
 
     /**
@@ -44,6 +52,11 @@ class Secret extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
     public function sharedWith()
     {
         return $this->belongsToMany(User::class, 'secret_user');
@@ -55,8 +68,8 @@ class Secret extends Model
     protected function project(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->getDecryptedValue($value),
-            set: fn($value) => $this->setEncryptedValue($value),
+            get: fn($value) => $this->secretEncryptionService->getDecryptedValue($value),
+            set: fn($value) => $this->secretEncryptionService->setEncryptedValue($value),
         );
     }
 
@@ -66,8 +79,8 @@ class Secret extends Model
     protected function service(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->getDecryptedValue($value),
-            set: fn($value) => $this->setEncryptedValue($value),
+            get: fn($value) => $this->secretEncryptionService->getDecryptedValue($value),
+            set: fn($value) => $this->secretEncryptionService->setEncryptedValue($value),
         );
     }
 
@@ -77,8 +90,8 @@ class Secret extends Model
     protected function link(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->getDecryptedValue($value),
-            set: fn($value) => $this->setEncryptedValue($value),
+            get: fn($value) => $this->secretEncryptionService->getDecryptedValue($value),
+            set: fn($value) => $this->secretEncryptionService->setEncryptedValue($value),
         );
     }
 
@@ -88,8 +101,8 @@ class Secret extends Model
     protected function username(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->getDecryptedValue($value),
-            set: fn($value) => $this->setEncryptedValue($value),
+            get: fn($value) => $this->secretEncryptionService->getDecryptedValue($value),
+            set: fn($value) => $this->secretEncryptionService->setEncryptedValue($value),
         );
     }
 
@@ -99,8 +112,8 @@ class Secret extends Model
     protected function password(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->getDecryptedValue($value),
-            set: fn($value) => $this->setEncryptedValue($value),
+            get: fn($value) => $this->secretEncryptionService->getDecryptedValue($value),
+            set: fn($value) => $this->secretEncryptionService->setEncryptedValue($value),
         );
     }
 
@@ -110,38 +123,8 @@ class Secret extends Model
     protected function additionalInformation(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->getDecryptedValue($value),
-            set: fn($value) => $this->setEncryptedValue($value),
+            get: fn($value) => $this->secretEncryptionService->getDecryptedValue($value),
+            set: fn($value) => $this->secretEncryptionService->setEncryptedValue($value),
         );
-    }
-
-    /**
-     * Méthode helper pour déchiffrer une valeur
-     */
-    private function getDecryptedValue($value)
-    {
-        if (is_null($value)) {
-            return null;
-        }
-
-        try {
-            return Crypt::decryptString($value);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            // Si le déchiffrement échoue, retourner la valeur brute
-            // (utile pour les données existantes non chiffrées)
-            return $value;
-        }
-    }
-
-    /**
-     * Méthode helper pour chiffrer une valeur
-     */
-    private function setEncryptedValue($value)
-    {
-        if (is_null($value)) {
-            return null;
-        }
-
-        return Crypt::encryptString($value);
     }
 }
